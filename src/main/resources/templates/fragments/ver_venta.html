@@ -1,0 +1,238 @@
+<!--Ver cliente-->
+<div th:fragment="ver-venta">
+
+  <div id="ver-venta" class="modal fade" tabindex="-1" role="dialog">
+    <div class="modal-dialog  modal-lg" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title">Ver Factura o Nota Venta</h4>
+        </div>
+        <div class="modal-body">                        
+                <div  id="factura" class="card-content table-responsive">
+                    <form>
+
+                        <!--formulario de cliente-->
+                        <fieldset>
+                            <div class="row">
+                                <div class="col-md-6">
+                                      <div class="form-group">
+                                          <label class="control-label">Código N°</label>
+                                          <input type="text" class="form-control" disabled v-model="factura.id"/>
+                                      </div>
+                                </div>
+                                <div class="col-md-6">
+                                      <div class="form-group">
+                                          <label class="control-label">Fecha</label>
+                                          <input type="text" class="form-control" disabled v-model="factura.fechaEmision"/>
+                                      </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <fieldset>
+                            <h5 class="text-primary">Datos de Cliente</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                      <div class="form-group">
+                                          <label class="control-label">Nombre</label>
+                                          <input type="text" class="form-control" disabled v-model="factura.cliente.nombreCompleto"/>
+                                      </div>
+                                </div>
+                            </div>
+                            <div class="row">                                                
+                                <div class="col-md-6 col-sm-12">
+                                      <div class="form-group">
+                                          <label class="control-label">Ruc o DNI</label>
+                                          <textarea  v-model="factura.cliente.rucODni" class="form-control" disabled></textarea>
+                                      </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                      <div class="form-group">
+                                          <label class="control-label">Telefono</label>
+                                          <input type="text" class="form-control" disabled v-model="factura.cliente.telefono"/>
+                                      </div>
+                                </div>
+                                <div class="col-md-6">
+                                      <div class="form-group">
+                                          <label class="control-label">Email</label>
+                                          <input type="text" class="form-control" disabled v-model="factura.cliente.email"/>
+                                      </div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        
+
+                        <!--formulario de producto-->
+                        <fieldset>
+                            <h5 class="text-primary">Detalle compra</h5>                                          
+
+                            <!-- Listado de productos - detalle de orden compras -->
+                            <table class="table lista">
+                                <thead class="text-primary">
+                                    <th>Código</th>
+                                    <th>Nombre</th>
+                                    <th>Cantidad</th>
+                                    <th>Prec. Compra</th>
+                                    <th>SubTotal</th> 
+                                </thead>
+                                <tbody>      
+                                    
+
+                                    <!--si no hay productos mostrar-->
+                                    <tr v-if="productos.length==0"><td colspan="6" textAlign="center">Lista Vacía</td></tr>
+
+                                    <!--en otro caso, mostrar todos los productos-->
+                                    <tr v-for="(producto,index) in productos">
+                                        <td>{{producto.productoId}}</td>
+                                        <td class="text-primary">{{producto.descripcion}}</td>
+                                        <td class="text-primary">{{producto.cantidad}}</td>
+                                        <td>S/.{{producto.precio}}</td>
+                                        <td class="text-primary">S/. {{producto.precio*producto.cantidad | currency}}</td>
+                                     </tr>
+                                </tbody>
+                            </table>
+                        </fieldset>
+
+
+                        <div class="row flex-column">
+                                <div class="col-md-3 flex-item-right">
+                                
+                                        <div class="form-group">
+                                            <label class="control-label">SubTotal
+                                              <input type="text" class="form-control"  disabled="" v-model="factura.subTotal"/>
+                                            </label>
+                                        </div>
+                                
+                                
+                                        <div class="form-group">
+                                            <label class="control-label">IGV
+                                              <input type="text" class="form-control"  disabled="" v-model="factura.igv"/>
+                                            </label>
+                                        </div>
+
+                                
+                                        <div class="form-group">
+                                            <label class="control-label">Total
+                                              <input type="text" class="form-control"  disabled="" v-model="factura.total" />
+                                            </label>
+                                        </div>                                        
+                                </div>
+
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+                                
+        <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Descargar en PDF <i class="material-icons">get_app</i></button>
+            <button type="button" class="btn btn-default" data-dismiss="modal">Aceptar</button>
+        </div>
+      </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+  </div><!-- /.modal -->
+
+  
+<!--obtener servicio de cliente-->
+<script th:src="@{/app/facturaService.js}"></script>
+<script th:src="@{/app/notaVentaService.js}"></script>
+<script th:src="@{/app/productoService.js}"></script>
+<script th:src="@{/app/detalleVentaService.js}"></script>
+<script th:src="@{/app/clienteService.js}"></script>
+
+<script type="text/javascript">
+                 //{"id":1,"productoId":0,"facturaId":1,"cantidad":2,"precio":0.0}
+                 //VUE FILTROS
+                  Vue.filter('currency', function (value) {
+                      return parseFloat(value).toFixed(2);
+                  });
+                    //modelo
+                    let data={
+                        factura:{ 
+                          id:0,
+                          codigo:0,
+                          clienteId:1,
+                           cliente:{
+                            rucODni:'',
+                            nombreCompleto:'',
+                            direccionFiscal:'',
+                            direccionEntrega:'',
+                            telefono:'',
+                            email:'',
+                            estadoId:0,
+                            estado:'0',
+                          },
+                          subTotal:0.0,
+                          igv:0.0,
+                          total:0.0,
+                          fecha:'2017-11-30',
+                        },
+                        productos:[],                        
+                    };
+
+
+                    //vista-modelo
+                    var verVenta = new Vue({
+                        el: "#ver-venta",
+                        data,
+                        beforeCreate: function(){                            
+
+                        }, //métodos
+                        methods:{ 
+                            //único que debe ser llamado fuera del ámbito
+                            show:function(factura){
+                              this.factura=factura;
+                              /*this.factura.cliente={
+                                ruc:'',
+                                razonSocial:'',
+                                telefono:'',
+                                email:'',
+                                estadoId:0,
+                                estado:'0',
+                              };*/
+                              this.productos=[];
+                              $('#ver-venta .label-floating').removeClass('is-empty');
+                              $('#ver-venta').modal('show');
+                              console.log('.....');
+                              console.log('id:'+factura.id);
+                              console.log('codigo:'+factura.codigo);
+                              $.ajax({
+                                url:((factura.codigo==undefined)?`/notas-venta/${factura.id}/detalle`:`/facturas/${factura.id}/detalle`),
+                                method:'get',
+                                success:(resp)=>{
+                                  console.log(resp);
+                                  if(resp.error==0){
+                                        var productos=resp.data;
+                                         ProductoService.get()
+                                                        .then((res)=>{
+                                                            for(var i in res)
+                                                              for(var ii in productos)
+                                                                if(productos[ii].productoId==res[i].id){
+                                                                  productos[ii].descripcion=res[i].descripcion;
+                                                                }
+
+                                                            this.productos=productos;
+
+                                                        });
+                                  }
+                                }
+                              });
+                              
+                                                   
+
+
+                            },
+                            //ocultar
+                            close:function(){
+                              $('#ver-venta').modal('hide');
+                            }
+                        }
+                    });
+        
+    </script>
+
+</div>

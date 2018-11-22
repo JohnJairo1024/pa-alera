@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<!--título de web, metas, dependencias CSS/JS-->
+<head th:include="fragments/header :: header (pageName='Compras')">
+</head>
+
+<body>
+    <div class="wrapper">
+        <div th:include="fragments/sidenav :: sidenav" class="sidebar" data-color="purple" data-image="../img/sidebar-1.jpg"></div>
+
+        <div class="main-panel">
+            <nav th:include="fragments/navbar :: navbar" class="navbar navbar-transparent navbar-absolute"></nav>
+            <div class="content">
+                <div class="container-fluid">
+                    <div class="row">                        
+                        <div class="col-md-12">
+                            <div class="card ordenCompras">
+                                <div class="card-header" data-background-color="purple">
+                                    <h4 class="title">Compras</h4>
+                                    <p class="category">Listado de orden de compra</p>
+                                </div>
+                                <div  id="lista-ordenCompras" class="card-content table-responsive">
+                                	<!--botón agregar nuevo-->
+                                    <div class="row col-md-12">             
+                                        <a id="btn-agregar-ordenCompra" 
+                                           class="btn btn-white btn-just-icon btn-round" 
+                                           href="./generar_orden_compra"
+                                           data-toggle="tooltip" 
+                                           title="Agregar orden de compra">
+                                              <i class="material-icons">note_add</i>
+                                        </a>
+                                        
+                                    </div>
+
+                                    <!--lista de ordenCompras en tabla-->
+                                    <table class="table lista">
+                                        <thead class="text-primary">
+                                            <th>Código</th>
+                                            <th>Proveedor</th>
+                                            <th>Fecha</th>
+                                            <th>Total</th>
+                                            <th>Acciones</th>
+                                        </thead>
+                                        <tbody>      
+                                             <!--si no hay productos mostrar-->
+                                            <tr v-if="ordenCompras.length==0"><td colspan="6" textAlign="center">Lista Vacía</td></tr>
+                                            <!--vista-->                                   
+                                            <tr v-for="ordenCompra in ordenCompras">
+                                                <td>N°{{ordenCompra.id}}</td>
+                                                <td>{{ordenCompra.proveedor.razonSocial}}</td>            
+                                                <td>{{ordenCompra.fecha}}</td>
+                                                <td class="text-primary">S/. {{ordenCompra.total}}</td>
+                                                <td>
+                                                    <!--<a @click="editarOrdenCompra(ordenCompra)" href="#editar-ordenCompra"><i class="material-icons">border_color</i></a>-->
+                                                    <a @click="verOrdenCompra(ordenCompra)" href="#ver-ordenCompra"><i class="material-icons">visibility</i></a>
+                                                </td>
+                                             </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!--footer-->
+            <footer class="footer" th:replace="fragments/footer :: footer"></footer> 
+        
+        </div>
+    </div>
+
+    <!--dependencias JS-->
+    <div th:replace="fragments/footer_dependencies :: dependencies (pageType='system')"></div> 
+
+    <div th:replace="fragments/ver_orden_compra :: ver-orden-compra"></div>
+    <!--<div th:replace="fragments/mantener_ordenCompra :: mantener-ordenCompra"></div> -->
+
+    <!--obtener servicio de ordenCompra - ya importada en ver orden compra-->
+    <script th:src="@{/app/proveedorService.js}"></script>
+
+    <script type="text/javascript">        
+        $(document).ready(function() {
+                    //modelo
+                    var data={
+                        ordenCompras:[],
+                        busqueda:{
+                            valor:'',
+                            filtroSeleccionadoId:1,
+                            filtros:[
+                                {
+                                    id:1,
+                                    nombre:'código'
+                                },
+                                {
+                                    id:2,
+                                    nombre:'nombre'
+                                }
+                            ]
+                        }
+
+                    };
+
+
+                    //vista-modelo
+                    var vm = new Vue({
+                        el: "#lista-ordenCompras",
+                        data,
+                        beforeCreate: function(){
+                            OrdenCompraService.get()
+                                           .then((ordenCompras)=>{
+                                                console.log(ordenCompras);                          
+                                                ProveedorService.get()
+                                                                .then((proveedores)=>{
+                                                                        console.log(proveedores);
+                                                                        this.ordenCompras=ordenCompras;     
+                                                                        for(var i in this.ordenCompras)
+                                                                            for(var ii in proveedores)
+                                                                                if(this.ordenCompras[i].proveedorId==proveedores[ii].id){    
+                                                                                    this.ordenCompras[i].proveedor=proveedores[ii];
+                                                                                }
+
+                                                                });
+                                            });
+
+                        }, //métodos
+                        methods:{
+                            editarOrdenCompra: function(ordenCompra){
+                                /*mantenerOrdenCompra.show('Editar ordenCompra',ordenCompra,
+                                    //cuando se modifique el ordenCompra en el sistema
+                                    (resp)=>{
+                                            modal('Mantenimiento de ordenCompras',resp.message);
+
+                                    });*/
+                            },
+                            agregarOrdenCompra: function(){
+                                /*mantenerOrdenCompra.show('Agregar ordenCompra',undefined,
+                                    //cuando se agregue el ordenCompra en el sistema
+                                    (resp,ordenCompra)=>{
+                                            modal('Mantenimiento de ordenCompras',resp.message);
+                                            if(resp.error==0) this.ordenCompras.push(ordenCompra);
+                                    }
+                                );*/
+                            },
+                            buscarOrdenCompra: function(){                                
+                                if(this.busqueda.valor.trim().length>0)
+                                    OrdenCompraService.buscar(this.busqueda.valor,this.busqueda.filtroSeleccionadoId);
+                                else
+                                    OrdenCompraService.buscar('','');
+
+                            },
+                            verOrdenCompra:function(ordenCompra){
+                                verOrdenCompra.show(ordenCompra);
+                            }
+                        }
+                    });
+        });
+        
+    </script>
+
+</body>
+
+
+</html>
